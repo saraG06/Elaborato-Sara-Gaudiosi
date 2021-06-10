@@ -9,6 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.3.2/dist/chart.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
 	
+	
+	
 </head>
 
 <body>
@@ -43,13 +45,15 @@ var render = function(data){
 	  data: {
 		labels: data.labels,
 		datasets: [{ 
-			data:
-			label:
-			
+			data: data.open,
+			label: "Open",
+			borderColor: "rgb(62,149,205)",
+			backgroundColor: "rgb(62,149,205,0.1)",
 		  }, { 
-			data: 
-			label: 
-			
+			data: data.closed,
+			label: "Closed",
+			borderColor: "rgb(60,186,159)",
+			backgroundColor: "rgb(60,186,159,0.1)",
 		  }
 		]
 	  },
