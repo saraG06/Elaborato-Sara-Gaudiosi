@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.3.2/dist/chart.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+	
+	<style>
+		.page{
+			padding-left:10%
+		}
+		.container {  
+			width:50%;
+		}
+	</style>
+	
+</head>
+
+<body>
+
+    <div class="page">
+		<div class="container">
+			<canvas id="ordersChart" width="100" height="100"></canvas>
+		</div>	
+    </div>
+
+<script>
+
+const requestJson = (function (url) {
+    var json = null;
+    $.ajax({
+        'async': false,
+        'global': false,
+        'url': url,
+        'dataType': "json",
+        'success': function (data) {
+            json = data;
+        }
+    });
+    return json;
+}); 
+
+
+var render = function(data){
+	var ctx = document.getElementById('ordersChart').getContext('2d');
+	var ordersChart = new Chart(ctx, {
+	  type: 'line',
+	  data: {
+		labels: data.labels,
+		datasets: [{ 
+			data: data.open,
+			label: "Open",
+			borderColor: "rgb(62,149,205)",
+			backgroundColor: "rgb(62,149,205,0.1)",
+		  }, { 
+			data: data.closed,
+			label: "Closed",
+			borderColor: "rgb(60,186,159)",
+			backgroundColor: "rgb(60,186,159,0.1)",
+		  }
+		]
+	  },
+	});
+}
+
+var prepare = function(closedOrders, openOrders) {
+	
+		
+	orders = {}; 
+	_open = [];
+	_closed = [];
+	_labels = []
+	
+	
+	closedOrders.forEach(function(order){
+		if(orders[order.x] === undefined){  
+			orders[order.x] = {open:0, closed: 0};// chiave valore		
+		}
+		orders[order.x]['closed'] += Number(order.y); //   prendo gli ordini con la stessa data(order.x) e  con la chiave 'closed'  e sommo tutti gli elementi y per ogni data 
+	});
+	
+	openOrders.forEach(function(order){
+		if(orders[order.x] === undefined){
+			orders[order.x] = {open: 0, closed: 0};		
+		}
+		orders[order.x]['open'] += Number(order.y);
+	});
+	
+	_labels = Object.keys(orders); // restituisce le chiavi  x 
+	_labels.forEach(function(orderkey){ // funzione anonima
+		_open.push(orders[orderkey].open); // aggiunge tutti gli ordini con indice order key , con chiave .open
+		_closed.push(orders[orderkey].closed);
+	});
+	
+	data = {
+		labels: _labels,
+		open:_open,
+		closed: _closed
+	}
+	
+	console.log(data) //controllo
+	
+	return data;
+}
+
+var fetch = function(){
+
+	const closedOrdersURL 	=  "https://bitbucket.org/d4t4w1z4rd/chart-fe/raw/add693bff4b6385545b842190f44b7b0dc05022b/data-close-orders.json"
+	const openOrdersURL 	=  "https://bitbucket.org/d4t4w1z4rd/chart-fe/raw/add693bff4b6385545b842190f44b7b0dc05022b/data-open-orders.json"
+
+	const closedOrders = requestJson(closedOrdersURL);
+	const openOrders = requestJson(openOrdersURL);
+
+	return prepare(closedOrders, openOrders); // riorganizza i dati 
+	
+}
+
+$( document ).ready(function() {  //carica i dati 
+	
+	data = fetch();
+	render(data);
+	
+}); 
+
+
+</script>
+</body>
+</html>
